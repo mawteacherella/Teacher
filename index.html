@@ -173,4 +173,1877 @@
             <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4">
                 <div class="flex justify-between items-center mb-2">
                     <h4 class="font-bold text-indigo-900 text-xs flex items-center">
-                        <i class="fa-solid fa-bullhorn text-amber
+                        <i class="fa-solid fa-bullhorn text-amber-500 mr-2"></i> ประกาศประจำวันถึงนักเรียน
+                    </h4>
+                    <button onclick="editDailyAnnouncement()" class="text-xs text-indigo-600 hover:underline font-medium teacher-only">แก้ไข</button>
+                </div>
+                <p id="dailyAnnouncementText" class="text-xs text-indigo-950 leading-relaxed bg-white/80 p-3 rounded-xl border border-indigo-100">
+                    "วันนี้ครูเข้าสอนตามปกติ คาบว่างที่เปิดรับนัดหมายสามารถส่งคำขอเข้าพบได้ครับ"
+                </p>
+            </div>
+
+            <!-- Action Button: Add Substitute Duty (บันทึกรับสอนแทนครูท่านอื่น) -->
+            <div class="teacher-only">
+                <button onclick="openAddSubstituteDutyModal()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-hand-holding-hand text-sm"></i> + บันทึกภาระงาน "ไปสอนแทนครูท่านอื่น"
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Daily Schedule & Period Management (8 Cols) -->
+        <div class="lg:col-span-8 space-y-5">
+            
+            <!-- Date Selector Banner -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-3">
+                <div>
+                    <span id="selectedDateLabel" class="text-xs font-bold text-indigo-600 uppercase tracking-wider">วันจันทร์ที่ 23 พฤศจิกายน 2569</span>
+                    <h2 class="text-lg font-bold text-slate-800">ตารางสอนและภาระงานประจำวัน</h2>
+                </div>
+
+                <!-- Daily Overall Status Selector (Teacher Only) -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <label class="text-xs font-medium text-slate-500 teacher-only">สถานะวันนี้:</label>
+                    <select id="dailyStatusSelect" onchange="updateDailyStatus(this.value)" class="teacher-only bg-slate-50 border border-slate-300 text-xs font-bold rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="normal">🟢 มาสอนตามปกติ</option>
+                        <option value="training">🟡 ติดภารกิจ / อบรม</option>
+                        <option value="leave">🔴 ลากิจ / ลาป่วย</option>
+                        <option value="substitute">🟣 มีการจัดครูสอนแทน</option>
+                        <option value="holiday">🔵 วันหยุดพิเศษ (โรงเรียนปิด)</option>
+                    </select>
+                    
+                    <!-- Export Daily Schedule Button -->
+                    <button onclick="copyScheduleSnippet()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium transition flex items-center">
+                        <i class="fa-regular fa-copy mr-1.5"></i> คัดลอกตารางลง LINE
+                    </button>
+                </div>
+            </div>
+
+            <!-- Period Cards List -->
+            <div id="periodsContainer" class="space-y-4">
+                <!-- Periods loaded dynamically via JS -->
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TAB 2: MASTER PERSONAL TEACHING SCHEDULE & SEMESTER SYNC -->
+    <div id="tabContentMaster" class="hidden max-w-7xl mx-auto px-4 mt-6 space-y-6">
+        
+        <!-- Top Banner & Semester Sync Controls -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5">
+            <div class="flex flex-wrap justify-between items-start gap-4 border-b border-slate-100 pb-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-lg">ตารางสอนหลักประจำสัปดาห์</span>
+                        <span id="masterSemesterTag" class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2.5 py-1 rounded-lg">เทอม 2/2569</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mt-2">บันทึกตารางสอนส่วนบุคคล & เชื่อมปฏิทินทั้งเทอม</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">กำหนดรายวิชา ห้องเรียน และคาบว่างประจำวันจันทร์ - ศุกร์ จากนั้นกดเชื่อมข้อมูลเพื่อให้แสดงในปฏิทินปฏิบัติงานตลอดทั้งภาคเรียนอัตโนมัติ</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="openPeriodTimesModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-regular fa-clock text-indigo-600"></i> ตั้งค่าเวลาเรียนแต่ละคาบ
+                    </button>
+                    <button onclick="clearSemesterCalendarData()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can"></i> ล้างข้อมูลปฏิทินทั้งเทอม
+                    </button>
+                </div>
+            </div>
+
+            <!-- Semester Date Range & Sync Form -->
+            <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+                <div class="lg:col-span-3">
+                    <label class="block text-xs font-bold text-indigo-950 mb-1">วันเปิดภาคเรียน (เริ่มต้น) *</label>
+                    <input type="date" id="inputSemesterStart" class="w-full bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div class="lg:col-span-3">
+                    <label class="block text-xs font-bold text-indigo-950 mb-1">วันปิดภาคเรียน (สิ้นสุด) *</label>
+                    <input type="date" id="inputSemesterEnd" class="w-full bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div class="lg:col-span-3 flex items-center pb-1.5">
+                    <label class="inline-flex items-start gap-2 cursor-pointer text-xs text-indigo-950">
+                        <input type="checkbox" id="chkPreserveSpecialDays" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
+                        <span><strong>รักษาข้อมูลวันพิเศษเดิม</strong> (ไม่เขียนทับวันหยุดพิเศษ / ลา / อบรม / สอนแทน)</span>
+                    </label>
+                </div>
+                <div class="lg:col-span-3">
+                    <button onclick="syncMasterScheduleToSemester()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate"></i> บันทึก & เชื่อมลงปฏิทินทั้งเทอม
+                    </button>
+                </div>
+            </div>
+
+            <!-- Semester Sync Summary Stats -->
+            <div id="syncSummaryBanner" class="flex flex-wrap items-center justify-between gap-2 text-xs bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 text-slate-600">
+                <div class="flex flex-wrap items-center gap-4">
+                    <span><i class="fa-solid fa-chalkboard-user text-indigo-600 mr-1"></i> คาบสอนทั้งหมดต่อสัปดาห์: <strong id="statWeeklyTeachingCount" class="text-slate-900">0 คาบ</strong></span>
+                    <span><i class="fa-solid fa-mug-hot text-emerald-600 mr-1"></i> คาบว่างต่อสัปดาห์: <strong id="statWeeklyFreeCount" class="text-slate-900">0 คาบ</strong></span>
+                    <span><i class="fa-solid fa-calendar-check text-purple-600 mr-1"></i> จำนวนวันที่เชื่อมในปฏิทิน: <strong id="statSyncedDaysCount" class="text-slate-900">0 วัน</strong></span>
+                </div>
+                <span class="text-[11px] text-slate-400">* คลิกที่ช่องตารางด้านล่างเพื่อแก้ไขรายวิชาแต่ละคาบ</span>
+            </div>
+        </div>
+
+        <!-- Master Weekly Timetable Matrix (จันทร์ - ศุกร์) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-4 bg-slate-800 text-white flex flex-wrap justify-between items-center gap-2">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-table text-amber-300"></i> ตารางสอนส่วนบุคคลประจำสัปดาห์ (วันจันทร์ - วันศุกร์)
+                </h3>
+                <div class="flex items-center gap-3 text-[11px]">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-500 inline-block"></span> คาบสอน</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-400 inline-block"></span> กิจกรรม/ชุมนุม</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-400 inline-block"></span> คาบว่าง (เปิดรับนัด)</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto timetable-scroll">
+                <table class="w-full border-collapse min-w-[980px] text-xs">
+                    <thead>
+                        <tr id="masterTableHeaderRow" class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                            <!-- Rendered dynamically with period numbers & times -->
+                        </tr>
+                    </thead>
+                    <tbody id="masterTableBody" class="divide-y divide-slate-200">
+                        <!-- Rendered dynamically for Mon - Fri -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS SECTION -->
+
+    <!-- Modal M1: Edit Master Weekly Slot (แก้ไขช่องตารางสอนส่วนบุคคล) -->
+    <div id="editMasterSlotModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <span id="masterSlotDayBadge" class="text-[11px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">วันจันทร์ • คาบที่ 1</span>
+                    <h3 class="font-bold text-slate-800 text-base mt-1">กำหนดรายวิชาในตารางสอนส่วนบุคคล</h3>
+                </div>
+                <button onclick="closeModal('editMasterSlotModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="saveMasterSlotData(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="masterSlotDay">
+                <input type="hidden" id="masterSlotPeriod">
+
+                <div>
+                    <label class="block text-slate-600 font-bold mb-1">ประเภทคาบเรียน *</label>
+                    <select id="masterSlotType" onchange="toggleMasterSlotFields(this.value)" class="w-full border border-slate-300 rounded-xl p-2.5 font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500">
+                        <option value="normal">📘 คาบสอนปกติ (รายวิชา)</option>
+                        <option value="activity">📙 กิจกรรม / ชุมนุม / แนะแนว / ประชุม</option>
+                        <option value="free">📗 คาบว่าง / เตรียมการสอน</option>
+                    </select>
+                </div>
+
+                <div id="masterTeachingFields" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-600 font-medium mb-1">รหัสวิชา</label>
+                            <input type="text" id="masterSubjectCode" placeholder="เช่น ว32101" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-medium mb-1">ห้องเรียน / ชั้นเรียน *</label>
+                            <input type="text" id="masterRoom" placeholder="เช่น ม.5/1 ห้อง 421" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ชื่อวิชา / ชื่อกิจกรรม *</label>
+                        <input type="text" id="masterSubjectName" placeholder="เช่น วิทยาศาสตร์กายภาพ 2" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div id="masterFreeOptions" class="hidden bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl space-y-2">
+                    <label class="inline-flex items-center gap-2 cursor-pointer font-bold text-emerald-900">
+                        <input type="checkbox" id="masterAllowAppointment" class="rounded text-emerald-600 focus:ring-emerald-500">
+                        <span>เปิดรับคำขอนัดหมายจากนักเรียนอัตโนมัติในคาบว่างนี้</span>
+                    </label>
+                    <p class="text-[11px] text-emerald-700">เมื่อเชื่อมลงปฏิทินทั้งเทอม นักเรียนจะสามารถกดจองเข้าพบครูในคาบนี้ได้ทันที</p>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">สถานที่ / หมายเหตุเริ่มต้น (ถ้ามี)</label>
+                    <input type="text" id="masterDefaultNote" placeholder="เช่น ห้องพักครูวิทยาศาสตร์ หรือ เตรียมสมุดจดบันทึก" class="w-full border border-slate-300 rounded-xl p-2.5">
+                </div>
+
+                <div class="pt-3 border-t flex justify-between items-center gap-2">
+                    <button type="button" onclick="resetMasterSlotToFree()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 font-medium">
+                        ตั้งเป็นคาบว่าง
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeModal('editMasterSlotModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 font-medium">ยกเลิก</button>
+                        <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow">บันทึกคาบนี้</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal M2: Configure Period Times (ตั้งค่าเวลาเรียนแต่ละคาบ) -->
+    <div id="periodTimesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-indigo-600"></i> ตั้งค่าเวลาเรียนแต่ละคาบ (คาบ 1 - 7)
+                </h3>
+                <button onclick="closeModal('periodTimesModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="savePeriodTimes(event)" class="space-y-2.5 text-xs">
+                <div id="periodTimesInputsContainer" class="space-y-2">
+                    <!-- Dynamic period time inputs -->
+                </div>
+                <div class="pt-3 border-t flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('periodTimesModal')" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600 font-medium">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow">บันทึกเวลาเรียน</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 0: Edit Teacher Profile (แก้ไขโปรไฟล์ครูผู้สอน) -->
+    <div id="editProfileModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-id-card-clip text-indigo-600 mr-2"></i> แก้ไขโปรไฟล์ครูผู้สอน
+                </h3>
+                <button onclick="closeModal('editProfileModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="saveProfileData(event)" class="space-y-4 text-xs">
+                <!-- Avatar Preview & Upload -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-4">
+                    <img id="previewProfileAvatar" src="" alt="Preview" class="w-20 h-20 rounded-2xl object-cover border-2 border-indigo-500 shadow shrink-0 bg-white">
+                    <div class="flex-1 w-full space-y-2">
+                        <label class="block text-slate-700 font-bold">รูปโปรไฟล์ครู</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl font-medium transition inline-flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-upload"></i> อัปโหลดรูปจากเครื่อง
+                                <input type="file" id="inputProfileImageFile" accept="image/*" onchange="handleProfileImageUpload(event)" class="hidden">
+                            </label>
+                            <button type="button" onclick="resetDefaultAvatar()" class="bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-xl font-medium transition">
+                                ใช้รูปเริ่มต้น
+                            </button>
+                        </div>
+                        <div>
+                            <input type="text" id="inputProfileAvatarUrl" oninput="previewAvatarFromUrl(this.value)" placeholder="หรือวางลิงก์รูปภาพ (URL) ที่นี่..." class="w-full border border-slate-300 rounded-xl px-3 py-1.5 text-[11px] bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Info Fields -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ชื่อ-นามสกุล ผู้สอน *</label>
+                        <input type="text" id="inputProfileName" required placeholder="เช่น ครูสมศรี ใจดี" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ตำแหน่ง / วิทยฐานะ *</label>
+                        <input type="text" id="inputProfilePosition" required placeholder="เช่น ครูชำนาญการพิเศษ" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">กลุ่มสาระการเรียนรู้ / แผนกวิชา *</label>
+                    <input type="text" id="inputProfileDept" required placeholder="เช่น กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ชื่อโรงเรียน / สถานศึกษา *</label>
+                        <input type="text" id="inputProfileSchool" required placeholder="เช่น โรงเรียนสาธิตวิทยา" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ภาคเรียน / ปีการศึกษา</label>
+                        <input type="text" id="inputProfileSemester" placeholder="เช่น เทอม 2/2569" class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('editProfileModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 font-medium">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> บันทึกโปรไฟล์
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 1: Edit Period / Assign Substitute Teacher (แก้ไขคาบเรียน & ครูสอนแทน) -->
+    <div id="editPeriodModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base" id="editModalTitle">แก้ไขข้อมูลคาบเรียน</h3>
+                <button onclick="closeModal('editPeriodModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="editPeriodForm" onsubmit="savePeriodData(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="editPeriodId">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">รหัสวิชา</label>
+                        <input type="text" id="inputSubjectCode" class="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ชื่อวิชา</label>
+                        <input type="text" id="inputSubjectName" class="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ห้องเรียน / ชั้นเรียน</label>
+                        <input type="text" id="inputRoom" class="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">สถานะคาบเรียน</label>
+                        <select id="inputPeriodStatus" onchange="toggleSubstituteFields(this.value)" class="w-full border rounded-xl p-2.5 font-semibold text-slate-700">
+                            <option value="normal">🟢 สอนตามปกติ</option>
+                            <option value="free">⚪ คาบว่าง</option>
+                            <option value="has_substitute">🟣 มีครูมาสอนแทน</option>
+                            <option value="cancelled">🔴 งดการสอน / กิจกรรมโรงเรียน</option>
+                            <option value="exam">🟡 สอบเก็บคะแนน / สอบกลางภาค</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section: Substitute Teacher Details -->
+                <div id="substituteFields" class="bg-purple-50 p-3.5 rounded-xl border border-purple-200 space-y-3 hidden">
+                    <p class="font-bold text-purple-900 flex items-center">
+                        <i class="fa-solid fa-user-clock mr-1.5"></i> ข้อมูลครูผู้เข้าสอนแทน
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-600 font-medium mb-1">ชื่อ-สกุล ครูสอนแทน *</label>
+                            <input type="text" id="inputSubTeacherName" placeholder="เช่น ครูสมชาย สายสืบ" class="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-medium mb-1">อีเมลครูสอนแทน (สำหรับแจ้งเตือน) *</label>
+                            <input type="email" id="inputSubTeacherEmail" placeholder="teacher@school.ac.th" class="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-purple-700">
+                        <i class="fa-solid fa-circle-info mr-1"></i> ระบบจะส่งอีเมลแจ้งเตือนไปยังครูผู้สอนแทนล่วงหน้า 30 นาที ก่อนเวลาเริ่มคาบนี้
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">หัวข้อที่สอน / กิจกรรมประจำคาบ</label>
+                    <input type="text" id="inputTopic" placeholder="เช่น บทที่ 3 การสังเคราะห์ด้วยแสง" class="w-full border rounded-xl p-2.5">
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">ข้อความแจ้งนักเรียน / การบ้าน (Homework)</label>
+                    <textarea id="inputHomework" rows="2" placeholder="เช่น ให้นักเรียนเตรียมอุปกรณ์ทดลองหน้า 45 มาด้วย" class="w-full border rounded-xl p-2.5"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('editPeriodModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 font-medium">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Add External Substitute Duty (บันทึกงานที่เราไปสอนแทนครูท่านอื่น) -->
+    <div id="addSubstituteDutyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base">บันทึกภาระงาน "ไปสอนแทนครูท่านอื่น"</h3>
+                <button onclick="closeModal('addSubstituteDutyModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="saveSubstituteDuty(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">ชื่อครูเจ้าของวิชา (ที่เราไปสอนแทน) *</label>
+                    <input type="text" id="subDutyOriginalTeacher" required placeholder="เช่น ครูวิภาวรรณ สุขใจ" class="w-full border rounded-xl p-2.5">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">คาบเรียนที่ *</label>
+                        <select id="subDutyPeriodNumber" class="w-full border rounded-xl p-2.5 font-bold">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ห้องเรียน / ชั้น *</label>
+                        <input type="text" id="subDutyRoom" required placeholder="เช่น ม.5/2 ห้อง 321" class="w-full border rounded-xl p-2.5">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">รหัสวิชา / วิชา</label>
+                        <input type="text" id="subDutySubject" placeholder="ว30202 เคมีเพิ่มเติม" class="w-full border rounded-xl p-2.5">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">อีเมลของเรา (รับแจ้งเตือน 30 นาที)</label>
+                        <input type="email" id="subDutyMyEmail" placeholder="myemail@school.ac.th" class="w-full border rounded-xl p-2.5">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">รายละเอียดงานที่ต้องฝากสอน / กิจกรรม</label>
+                    <textarea id="subDutyNotes" rows="2" placeholder="เช่น ให้นักเรียนทำแบบฝึกหัดท้ายบทในหนังสือเรียน หน้า 89" class="w-full border rounded-xl p-2.5"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('addSubstituteDutyModal')" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl shadow">บันทึกรายการสอนแทน</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Email Reminder Settings (ตั้งค่าระบบแจ้งเตือนอีเมลล่วงหน้า 30 นาที) -->
+    <div id="emailSettingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-envelope-open-text text-amber-500 mr-2"></i> ตั้งค่าการแจ้งเตือนอีเมล 30 นาที
+                </h3>
+                <button onclick="closeModal('emailSettingsModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="text-xs space-y-3 text-slate-600">
+                <p>ระบบจะทำการตรวจสอบตารางสอนสอนแทนอัตโนมัติ และส่งอีเมลแจ้งเตือนไปยังครูผู้สอนแทน <strong>ล่วงหน้า 30 นาที</strong> ก่อนเริ่มคาบเรียน</p>
+
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl space-y-1">
+                    <p class="font-bold text-amber-900">⚡ การเชื่อมต่อ Email Service (EmailJS):</p>
+                    <p class="text-[11px] text-amber-800">สามารถใส่ API Public Key จาก EmailJS เพื่อส่งอีเมลจริงเข้า Inbox ได้ทันที หรือใช้งานระบบแจ้งเตือนผ่านหน้าจอเบราว์เซอร์อัตโนมัติ</p>
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-1 text-slate-700">EmailJS Public Key (Optional)</label>
+                    <input type="text" id="emailjsPublicKey" placeholder="วาง Public Key เช่น user_xxxxxxx" class="w-full border rounded-xl p-2.5">
+                </div>
+
+                <div class="pt-2 border-t flex justify-between items-center">
+                    <button onclick="testTriggerEmailNotification()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-medium text-xs">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> ทดสอบส่งอีเมลทันที
+                    </button>
+                    <button onclick="saveEmailSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium text-xs shadow">
+                        บันทึกการตั้งค่า
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Student Request Appointment (นักเรียนส่งคำขอนัดหมาย) -->
+    <div id="studentAppointmentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-calendar-plus text-indigo-600 mr-2"></i> ส่งคำขอนัดหมายเข้าพบครู
+                </h3>
+                <button onclick="closeModal('studentAppointmentModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="submitStudentAppointment(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="appointPeriodId">
+
+                <div class="bg-indigo-50 p-3 rounded-xl">
+                    <p class="font-bold text-indigo-900" id="appointPeriodTitle">คาบเรียนที่ 4 (11:00 - 11:50 น.)</p>
+                    <p class="text-[11px] text-indigo-700" id="appointPeriodDate">วันจันทร์ที่ 23 พฤศจิกายน 2569</p>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">ชื่อ-นามสกุล นักเรียน *</label>
+                    <input type="text" id="appointStudentName" required placeholder="ด.ช. สมศักดิ์ เรียนดี" class="w-full border rounded-xl p-2.5">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">ชั้น / ห้องเรียน *</label>
+                        <input type="text" id="appointStudentClass" required placeholder="ม.5/1 เลขที่ 4" class="w-full border rounded-xl p-2.5">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-medium mb-1">เบอร์โทร / LINE ID *</label>
+                        <input type="text" id="appointStudentContact" required placeholder="081-234-5678" class="w-full border rounded-xl p-2.5">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 font-medium mb-1">เรื่องที่ต้องการเข้าพบ / ปรึกษา *</label>
+                    <textarea id="appointReason" required rows="3" placeholder="เช่น ขอคำแนะนำโครงการวิทยาศาสตร์ / ปรึกษาโจทย์เคมีเพิ่มเติม" class="w-full border rounded-xl p-2.5"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('studentAppointmentModal')" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl shadow">ส่งคำขอนัดหมาย</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: Appointment Manager for Teacher (จัดการคำขอนัดหมายของครู) -->
+    <div id="appointmentsManagerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-list-check text-indigo-600 mr-2"></i> รายการคำขอนัดหมายจากนักเรียน
+                </h3>
+                <button onclick="closeModal('appointmentsManagerModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="appointmentsListContainer" class="space-y-3">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- HELPER: SAFE LOCAL DATE PARSING ---
+        function parseLocalDate(dateStr) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function formatDateKey(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function formatThaiShortDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = parseLocalDate(dateStr);
+            const shortMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            return `${d.getDate()} ${shortMonths[d.getMonth()]} ${d.getFullYear() + 543}`;
+        }
+
+        // --- TEACHER PROFILE STATE ---
+        const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200";
+        const defaultTeacherProfile = {
+            name: "ครูสมศรี ใจดี",
+            position: "ครูชำนาญการพิเศษ",
+            dept: "กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี",
+            school: "โรงเรียนสาธิตวิทยา",
+            semester: "เทอม 2/2569",
+            avatar: DEFAULT_AVATAR
+        };
+        let teacherProfile = JSON.parse(localStorage.getItem('teacherProfileData')) || { ...defaultTeacherProfile };
+        let tempAvatarDataUrl = "";
+
+        // --- MASTER WEEKLY SCHEDULE & SEMESTER CONFIG ---
+        const DAY_NAMES = {
+            1: "วันจันทร์",
+            2: "วันอังคาร",
+            3: "วันพุธ",
+            4: "วันพฤหัสบดี",
+            5: "วันศุกร์"
+        };
+
+        const defaultPeriodTimes = [
+            "08:30 - 09:20",
+            "09:20 - 10:10",
+            "10:10 - 11:00",
+            "11:00 - 11:50",
+            "12:50 - 13:40",
+            "13:40 - 14:30",
+            "14:30 - 15:20"
+        ];
+
+        const defaultSemesterConfig = {
+            startDate: "2026-11-02",
+            endDate: "2027-03-19",
+            periodTimes: [...defaultPeriodTimes]
+        };
+
+        let semesterConfig = JSON.parse(localStorage.getItem('teacherSemesterConfig')) || { ...defaultSemesterConfig };
+
+        // Default Master Schedule (Mon = 1 ... Fri = 5)
+        const defaultMasterSchedule = {
+            1: [
+                { id: 1, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/1 (ห้อง 421)", note: "เตรียมหนังสือเรียน", allowAppointment: false },
+                { id: 2, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/2 (ห้อง 422)", note: "", allowAppointment: false },
+                { id: 3, type: "free", code: "", subject: "คาบว่าง / เตรียมการสอน", room: "ห้องพักครูวิทยาศาสตร์", note: "เปิดรับคำปรึกษานักเรียน", allowAppointment: true },
+                { id: 4, type: "normal", code: "ว31102", subject: "วิทยาศาสตร์ชีวภาพ", room: "ม.4/1 (ห้อง 411)", note: "", allowAppointment: false },
+                { id: 5, type: "free", code: "", subject: "คาบว่าง", room: "ห้องพักครู", note: "", allowAppointment: false },
+                { id: 6, type: "normal", code: "ว30223", subject: "เคมีเพิ่มเติม 3", room: "ห้องปฏ.เคมี 2", note: "ปฏิบัติการทดลอง", allowAppointment: false },
+                { id: 7, type: "activity", code: "กิจกรรม", subject: "ชุมนุมวิทยาศาสตร์", room: "ห้องปฏ.เคมี 1", note: "กิจกรรมพัฒนาผู้เรียน", allowAppointment: false }
+            ],
+            2: [
+                { id: 1, type: "free", code: "", subject: "คาบว่าง", room: "ห้องพักครู", note: "", allowAppointment: false },
+                { id: 2, type: "normal", code: "ว30223", subject: "เคมีเพิ่มเติม 3", room: "ม.5/1 (ห้องปฏ.เคมี 2)", note: "", allowAppointment: false },
+                { id: 3, type: "normal", code: "ว30223", subject: "เคมีเพิ่มเติม 3", room: "ม.5/1 (ห้องปฏ.เคมี 2)", note: "", allowAppointment: false },
+                { id: 4, type: "free", code: "", subject: "คาบว่าง / เปิดรับนัดหมาย", room: "ห้องพักครูวิทยาศาสตร์", note: "ให้คำปรึกษาโครงงาน", allowAppointment: true },
+                { id: 5, type: "normal", code: "ว31102", subject: "วิทยาศาสตร์ชีวภาพ", room: "ม.4/2 (ห้อง 412)", note: "", allowAppointment: false },
+                { id: 6, type: "normal", code: "ว31102", subject: "วิทยาศาสตร์ชีวภาพ", room: "ม.4/3 (ห้อง 413)", note: "", allowAppointment: false },
+                { id: 7, type: "free", code: "", subject: "คาบว่าง", room: "ห้องพักครู", note: "", allowAppointment: false }
+            ],
+            3: [
+                { id: 1, type: "normal", code: "ว31102", subject: "วิทยาศาสตร์ชีวภาพ", room: "ม.4/1 (ห้อง 411)", note: "", allowAppointment: false },
+                { id: 2, type: "normal", code: "ว31102", subject: "วิทยาศาสตร์ชีวภาพ", room: "ม.4/2 (ห้อง 412)", note: "", allowAppointment: false },
+                { id: 3, type: "free", code: "", subject: "คาบว่าง / เปิดรับนัดหมาย", room: "ห้องพักครูวิทยาศาสตร์", note: "", allowAppointment: true },
+                { id: 4, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/3 (ห้อง 423)", note: "", allowAppointment: false },
+                { id: 5, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/4 (ห้อง 424)", note: "", allowAppointment: false },
+                { id: 6, type: "activity", code: "ประชุม", subject: "ประชุมกลุ่มสาระฯ วิทย์", room: "ห้องประชุม 2", note: "ประชุมประจำสัปดาห์", allowAppointment: false },
+                { id: 7, type: "activity", code: "ลูกเสือ", subject: "กิจกรรมลูกเสือ-เนตรนารี", room: "ลานกิจกรรม", note: "", allowAppointment: false }
+            ],
+            4: [
+                { id: 1, type: "normal", code: "ว30223", subject: "เคมีเพิ่มเติม 3", room: "ม.5/2 (ห้องปฏ.เคมี 2)", note: "", allowAppointment: false },
+                { id: 2, type: "normal", code: "ว30223", subject: "เคมีเพิ่มเติม 3", room: "ม.5/2 (ห้องปฏ.เคมี 2)", note: "", allowAppointment: false },
+                { id: 3, type: "normal", code: "ว31102", subject: "วิทยาศาสตร์ชีวภาพ", room: "ม.4/3 (ห้อง 413)", note: "", allowAppointment: false },
+                { id: 4, type: "free", code: "", subject: "คาบว่าง", room: "ห้องพักครู", note: "", allowAppointment: false },
+                { id: 5, type: "free", code: "", subject: "คาบว่าง / เปิดรับนัดหมาย", room: "ห้องพักครูวิทยาศาสตร์", note: "ส่งงานแก้/ปรึกษาเรียน", allowAppointment: true },
+                { id: 6, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/1 (ห้อง 421)", note: "", allowAppointment: false },
+                { id: 7, type: "free", code: "", subject: "คาบว่าง", room: "ห้องพักครู", note: "", allowAppointment: false }
+            ],
+            5: [
+                { id: 1, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/2 (ห้อง 422)", note: "", allowAppointment: false },
+                { id: 2, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/3 (ห้อง 423)", note: "", allowAppointment: false },
+                { id: 3, type: "normal", code: "ว32101", subject: "วิทยาศาสตร์กายภาพ 2", room: "ม.5/4 (ห้อง 424)", note: "", allowAppointment: false },
+                { id: 4, type: "free", code: "", subject: "คาบว่าง", room: "ห้องพักครู", note: "", allowAppointment: false },
+                { id: 5, type: "normal", code: "ว30223", subject: "เคมีเพิ่มเติม 3", room: "ม.5/1 (ห้องปฏ.เคมี 2)", note: "", allowAppointment: false },
+                { id: 6, type: "activity", code: "แนะแนว", subject: "โฮมรูม / กิจกรรมแนะแนว", room: "ม.5/1 (ห้อง 421)", note: "ครูที่ปรึกษา", allowAppointment: false },
+                { id: 7, type: "free", code: "", subject: "คาบว่าง / เปิดรับนัดหมาย", room: "ห้องพักครูวิทยาศาสตร์", note: "", allowAppointment: true }
+            ]
+        };
+
+        let masterWeeklySchedule = JSON.parse(localStorage.getItem('teacherMasterSchedule')) || JSON.parse(JSON.stringify(defaultMasterSchedule));
+
+        // --- DATA STATE MANAGEMENT ---
+        let currentView = 'teacher'; // 'teacher' or 'student'
+        let currentTeacherTab = 'daily'; // 'daily' or 'master'
+        let currentDate = new Date(2026, 10, 23); // Monday, 23 Nov 2026
+        let calendarYear = 2026;
+        let calendarMonth = 10; // Nov (0-indexed)
+
+        // Email Notification Sent Tracker
+        let sentEmailTracker = {};
+
+        // Schedule Data per Date ("YYYY-MM-DD")
+        let scheduleData = JSON.parse(localStorage.getItem('teacherScheduleData')) || null;
+
+        // Build Day Periods from Master Schedule for a given dayOfWeek (1-5)
+        function buildPeriodsFromMaster(dayOfWeek) {
+            const times = semesterConfig.periodTimes || defaultPeriodTimes;
+            const masterDay = masterWeeklySchedule[dayOfWeek];
+            if (!masterDay) {
+                return times.map((t, idx) => ({
+                    id: idx + 1,
+                    time: t,
+                    code: "",
+                    subject: "คาบว่าง",
+                    room: "-",
+                    status: "free",
+                    topic: "",
+                    homework: "",
+                    allowAppointment: false,
+                    subTeacherName: "",
+                    subTeacherEmail: ""
+                }));
+            }
+
+            return masterDay.map((slot, idx) => {
+                const isFree = slot.type === 'free';
+                return {
+                    id: slot.id || (idx + 1),
+                    time: times[idx] || defaultPeriodTimes[idx],
+                    code: isFree ? "" : (slot.code || ""),
+                    subject: slot.subject || (isFree ? "คาบว่าง" : "รายวิชา"),
+                    room: slot.room || "-",
+                    status: isFree ? "free" : "normal",
+                    topic: slot.type === 'activity' ? "กิจกรรมตามตาราง" : "",
+                    homework: slot.note || "-",
+                    allowAppointment: isFree ? Boolean(slot.allowAppointment) : false,
+                    subTeacherName: "",
+                    subTeacherEmail: ""
+                };
+            });
+        }
+
+        // Generate whole semester schedule silently on first launch
+        function initializeDefaultSemesterData() {
+            const generated = {};
+            const start = parseLocalDate(semesterConfig.startDate);
+            const end = parseLocalDate(semesterConfig.endDate);
+
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dow = d.getDay();
+                if (dow >= 1 && dow <= 5) {
+                    const key = formatDateKey(d);
+                    generated[key] = {
+                        status: "normal",
+                        announcement: "เข้าสอนตามตารางสอนปกติ คาบว่างที่เปิดรับนัดหมายสามารถส่งคำขอเข้าพบได้ครับ",
+                        fromMaster: true,
+                        periods: buildPeriodsFromMaster(dow)
+                    };
+                }
+            }
+
+            // Sample substitute period on 2026-11-23
+            if (generated["2026-11-23"]) {
+                generated["2026-11-23"].announcement = "วันนี้คาบ 2 มีครูสมชายเข้าสอนแทน สำหรับคาบ 3 ที่เปิดรับนัดหมาย สามารถส่งคำขอเข้ามาได้เลยครับ";
+                generated["2026-11-23"].fromMaster = false;
+                generated["2026-11-23"].periods[1] = {
+                    ...generated["2026-11-23"].periods[1],
+                    status: "has_substitute",
+                    topic: "การคำนวณปริมาณสารสัมพันธ์",
+                    homework: "ครูสมชายเข้าสอนแทน ให้ทำใบงานที่ 4.1 ส่งท้ายคาบ",
+                    subTeacherName: "ครูสมชาย สายสืบ",
+                    subTeacherEmail: "somchai@school.ac.th"
+                };
+            }
+
+            return generated;
+        }
+
+        if (!scheduleData) {
+            scheduleData = initializeDefaultSemesterData();
+            localStorage.setItem('teacherScheduleData', JSON.stringify(scheduleData));
+        }
+
+        // Appointments Storage
+        let appointments = JSON.parse(localStorage.getItem('teacherAppointments')) || [
+            {
+                id: 'apt-1',
+                date: '2026-11-23',
+                periodId: 3,
+                periodTime: 'คาบเรียนที่ 3 (10:10 - 11:00 น.)',
+                studentName: 'ด.ช. ณัฐชนน เรียนดี',
+                studentClass: 'ม.5/1 เลขที่ 12',
+                contact: '089-123-4567',
+                reason: 'ขอคำปรึกษาการทำโครงงานสกัดสารจากพืชครับ',
+                status: 'pending',
+                responseNote: ''
+            }
+        ];
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProfile();
+            updateSemesterBadges();
+            renderMasterScheduleTable();
+            renderCalendar();
+            renderDailySchedule();
+            updateAppointmentBadge();
+            startEmailReminderChecker();
+        });
+
+        // --- TAB NAVIGATION (DAILY vs MASTER SEMESTER SCHEDULE) ---
+        function switchTeacherTab(tabName) {
+            currentTeacherTab = tabName;
+            const dailyView = document.getElementById('tabContentDaily');
+            const masterView = document.getElementById('tabContentMaster');
+            const btnDaily = document.getElementById('tabBtnDaily');
+            const btnMaster = document.getElementById('tabBtnMaster');
+
+            if (tabName === 'daily') {
+                dailyView.classList.remove('hidden');
+                masterView.classList.add('hidden');
+                btnDaily.className = "px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-600 text-indigo-700 flex items-center gap-2 whitespace-nowrap transition";
+                btnMaster.className = "px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-indigo-600 flex items-center gap-2 whitespace-nowrap transition";
+                renderCalendar();
+                renderDailySchedule();
+            } else {
+                dailyView.classList.add('hidden');
+                masterView.classList.remove('hidden');
+                btnMaster.className = "px-4 py-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-600 text-indigo-700 flex items-center gap-2 whitespace-nowrap transition";
+                btnDaily.className = "px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-indigo-600 flex items-center gap-2 whitespace-nowrap transition";
+                document.getElementById('inputSemesterStart').value = semesterConfig.startDate;
+                document.getElementById('inputSemesterEnd').value = semesterConfig.endDate;
+                renderMasterScheduleTable();
+            }
+        }
+
+        function updateSemesterBadges() {
+            const rangeText = `${formatThaiShortDate(semesterConfig.startDate)} - ${formatThaiShortDate(semesterConfig.endDate)}`;
+            const topBadge = document.getElementById('semesterRangeBadgeText');
+            if (topBadge) topBadge.textContent = `ช่วงภาคเรียน: ${rangeText}`;
+
+            const masterTag = document.getElementById('masterSemesterTag');
+            if (masterTag) masterTag.textContent = `${teacherProfile.semester} (${rangeText})`;
+
+            const calHint = document.getElementById('calendarSemesterHint');
+            if (calHint) calHint.textContent = `${teacherProfile.semester}: ${rangeText}`;
+        }
+
+        // --- RENDER MASTER WEEKLY SCHEDULE TABLE ---
+        function renderMasterScheduleTable() {
+            const times = semesterConfig.periodTimes || defaultPeriodTimes;
+            const headerRow = document.getElementById('masterTableHeaderRow');
+            const tbody = document.getElementById('masterTableBody');
+
+            // Header Row
+            let headerHTML = `<th class="p-3 text-left font-bold text-slate-700 bg-slate-100 border-r border-slate-200 w-28 sticky left-0 z-10">วัน / คาบ</th>`;
+            times.forEach((timeStr, idx) => {
+                headerHTML += `
+                    <th class="p-2.5 text-center border-r border-slate-200 min-w-[130px]">
+                        <div class="font-bold text-indigo-900">คาบที่ ${idx + 1}</div>
+                        <div class="text-[10px] font-medium text-slate-500 mt-0.5">${timeStr}</div>
+                    </th>
+                `;
+            });
+            headerRow.innerHTML = headerHTML;
+
+            // Body Rows (Mon = 1 to Fri = 5)
+            tbody.innerHTML = '';
+            let weeklyTeachingCount = 0;
+            let weeklyFreeCount = 0;
+
+            for (let day = 1; day <= 5; day++) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/60 transition";
+
+                let rowHTML = `
+                    <td class="p-3 font-bold text-slate-800 bg-slate-50 border-r border-slate-200 sticky left-0 z-10">
+                        <div>${DAY_NAMES[day]}</div>
+                        <div class="text-[10px] font-normal text-slate-400">คลิกช่องเพื่อแก้ไข</div>
+                    </td>
+                `;
+
+                const daySlots = masterWeeklySchedule[day] || [];
+                for (let pIdx = 0; pIdx < 7; pIdx++) {
+                    const slot = daySlots[pIdx] || { id: pIdx + 1, type: 'free', code: '', subject: 'คาบว่าง', room: '-', note: '', allowAppointment: false };
+
+                    if (slot.type === 'free') weeklyFreeCount++;
+                    else weeklyTeachingCount++;
+
+                    let cellStyle = "bg-white hover:bg-indigo-50/60 border-slate-200";
+                    let badge = "";
+
+                    if (slot.type === 'normal') {
+                        cellStyle = "bg-indigo-50/70 hover:bg-indigo-100/80 border-slate-200";
+                        badge = slot.code ? `<span class="inline-block bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded mb-1">${slot.code}</span>` : '';
+                    } else if (slot.type === 'activity') {
+                        cellStyle = "bg-amber-50/80 hover:bg-amber-100/80 border-slate-200";
+                        badge = `<span class="inline-block bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded mb-1">${slot.code || 'กิจกรรม'}</span>`;
+                    } else {
+                        cellStyle = slot.allowAppointment
+                            ? "bg-emerald-50/60 hover:bg-emerald-100/70 border-slate-200"
+                            : "bg-slate-50/40 hover:bg-slate-100 border-slate-200";
+                        badge = slot.allowAppointment
+                            ? `<span class="inline-block bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded mb-1"><i class="fa-solid fa-calendar-check mr-0.5"></i> เปิดรับนัด</span>`
+                            : `<span class="inline-block bg-slate-200 text-slate-600 text-[10px] font-semibold px-1.5 py-0.5 rounded mb-1">คาบว่าง</span>`;
+                    }
+
+                    rowHTML += `
+                        <td onclick="openEditMasterSlotModal(${day}, ${pIdx + 1})" class="p-2.5 border-r ${cellStyle} cursor-pointer align-top transition group relative">
+                            <div class="flex justify-between items-start">
+                                ${badge}
+                                <i class="fa-solid fa-pen text-[10px] text-slate-400 opacity-0 group-hover:opacity-100 transition"></i>
+                            </div>
+                            <div class="font-bold text-slate-800 text-xs line-clamp-2 leading-snug">${slot.subject}</div>
+                            ${slot.room && slot.room !== '-' ? `<div class="text-[11px] text-slate-500 mt-1 truncate"><i class="fa-solid fa-location-dot text-rose-400 mr-0.5"></i> ${slot.room}</div>` : ''}
+                            ${slot.note ? `<div class="text-[10px] text-slate-400 mt-0.5 truncate">${slot.note}</div>` : ''}
+                        </td>
+                    `;
+                }
+
+                tr.innerHTML = rowHTML;
+                tbody.appendChild(tr);
+            }
+
+            // Update Stats
+            document.getElementById('statWeeklyTeachingCount').textContent = `${weeklyTeachingCount} คาบ`;
+            document.getElementById('statWeeklyFreeCount').textContent = `${weeklyFreeCount} คาบ`;
+
+            // Count synced days within semester range
+            const start = parseLocalDate(semesterConfig.startDate);
+            const end = parseLocalDate(semesterConfig.endDate);
+            let syncedCount = 0;
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const key = formatDateKey(d);
+                if (scheduleData[key]) syncedCount++;
+            }
+            document.getElementById('statSyncedDaysCount').textContent = `${syncedCount} วัน`;
+        }
+
+        // --- EDIT MASTER WEEKLY SLOT MODAL ---
+        function openEditMasterSlotModal(day, periodNum) {
+            const slot = masterWeeklySchedule[day][periodNum - 1];
+            const timeStr = (semesterConfig.periodTimes || defaultPeriodTimes)[periodNum - 1];
+
+            document.getElementById('masterSlotDay').value = day;
+            document.getElementById('masterSlotPeriod').value = periodNum;
+            document.getElementById('masterSlotDayBadge').textContent = `${DAY_NAMES[day]} • คาบที่ ${periodNum} (${timeStr} น.)`;
+
+            document.getElementById('masterSlotType').value = slot.type || 'normal';
+            document.getElementById('masterSubjectCode').value = slot.code || '';
+            document.getElementById('masterSubjectName').value = slot.type === 'free' ? '' : (slot.subject || '');
+            document.getElementById('masterRoom').value = slot.room === '-' ? '' : (slot.room || '');
+            document.getElementById('masterAllowAppointment').checked = Boolean(slot.allowAppointment);
+            document.getElementById('masterDefaultNote').value = slot.note || '';
+
+            toggleMasterSlotFields(slot.type || 'normal');
+            openModal('editMasterSlotModal');
+        }
+
+        function toggleMasterSlotFields(type) {
+            const teachFields = document.getElementById('masterTeachingFields');
+            const freeOptions = document.getElementById('masterFreeOptions');
+            const subNameInput = document.getElementById('masterSubjectName');
+            const roomInput = document.getElementById('masterRoom');
+
+            if (type === 'free') {
+                teachFields.classList.add('hidden');
+                freeOptions.classList.remove('hidden');
+                subNameInput.required = false;
+                roomInput.required = false;
+            } else {
+                teachFields.classList.remove('hidden');
+                freeOptions.classList.add('hidden');
+                subNameInput.required = true;
+                roomInput.required = true;
+            }
+        }
+
+        function saveMasterSlotData(e) {
+            e.preventDefault();
+            const day = parseInt(document.getElementById('masterSlotDay').value);
+            const periodNum = parseInt(document.getElementById('masterSlotPeriod').value);
+            const type = document.getElementById('masterSlotType').value;
+
+            if (type === 'free') {
+                const allowApt = document.getElementById('masterAllowAppointment').checked;
+                masterWeeklySchedule[day][periodNum - 1] = {
+                    id: periodNum,
+                    type: 'free',
+                    code: '',
+                    subject: allowApt ? 'คาบว่าง / เปิดรับนัดหมาย' : 'คาบว่าง',
+                    room: document.getElementById('masterDefaultNote').value.trim() || 'ห้องพักครู',
+                    note: document.getElementById('masterDefaultNote').value.trim(),
+                    allowAppointment: allowApt
+                };
+            } else {
+                masterWeeklySchedule[day][periodNum - 1] = {
+                    id: periodNum,
+                    type: type,
+                    code: document.getElementById('masterSubjectCode').value.trim() || (type === 'activity' ? 'กิจกรรม' : ''),
+                    subject: document.getElementById('masterSubjectName').value.trim(),
+                    room: document.getElementById('masterRoom').value.trim(),
+                    note: document.getElementById('masterDefaultNote').value.trim(),
+                    allowAppointment: false
+                };
+            }
+
+            localStorage.setItem('teacherMasterSchedule', JSON.stringify(masterWeeklySchedule));
+            renderMasterScheduleTable();
+            closeModal('editMasterSlotModal');
+        }
+
+        function resetMasterSlotToFree() {
+            const day = parseInt(document.getElementById('masterSlotDay').value);
+            const periodNum = parseInt(document.getElementById('masterSlotPeriod').value);
+
+            masterWeeklySchedule[day][periodNum - 1] = {
+                id: periodNum,
+                type: 'free',
+                code: '',
+                subject: 'คาบว่าง',
+                room: 'ห้องพักครู',
+                note: '',
+                allowAppointment: false
+            };
+
+            localStorage.setItem('teacherMasterSchedule', JSON.stringify(masterWeeklySchedule));
+            renderMasterScheduleTable();
+            closeModal('editMasterSlotModal');
+        }
+
+        // --- CONFIGURE PERIOD TIMES ---
+        function openPeriodTimesModal() {
+            const container = document.getElementById('periodTimesInputsContainer');
+            const times = semesterConfig.periodTimes || defaultPeriodTimes;
+            container.innerHTML = times.map((t, idx) => `
+                <div class="flex items-center gap-3">
+                    <span class="w-16 font-bold text-slate-700">คาบที่ ${idx + 1}:</span>
+                    <input type="text" id="periodTimeInput_${idx}" value="${t}" required placeholder="เช่น 08:30 - 09:20" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+                </div>
+            `).join('');
+            openModal('periodTimesModal');
+        }
+
+        function savePeriodTimes(e) {
+            e.preventDefault();
+            const newTimes = [];
+            for (let i = 0; i < 7; i++) {
+                newTimes.push(document.getElementById(`periodTimeInput_${i}`).value.trim() || defaultPeriodTimes[i]);
+            }
+            semesterConfig.periodTimes = newTimes;
+            localStorage.setItem('teacherSemesterConfig', JSON.stringify(semesterConfig));
+            renderMasterScheduleTable();
+            closeModal('periodTimesModal');
+            Swal.fire({ title: 'บันทึกเวลาเรียนแล้ว', text: 'อย่าลืมกด "บันทึก & เชื่อมลงปฏิทินทั้งเทอม" เพื่ออัปเดตเวลาใหม่ลงปฏิทิน', icon: 'success' });
+        }
+
+        // --- SYNC MASTER SCHEDULE TO WHOLE SEMESTER IN CALENDAR ---
+        function syncMasterScheduleToSemester() {
+            const startStr = document.getElementById('inputSemesterStart').value;
+            const endStr = document.getElementById('inputSemesterEnd').value;
+            const preserveSpecial = document.getElementById('chkPreserveSpecialDays').checked;
+
+            if (!startStr || !endStr) {
+                Swal.fire('กรุณาระบุวันที่', 'โปรดเลือกวันเปิดภาคเรียนและวันปิดภาคเรียน', 'warning');
+                return;
+            }
+
+            const startDate = parseLocalDate(startStr);
+            const endDate = parseLocalDate(endStr);
+
+            if (endDate < startDate) {
+                Swal.fire('ช่วงวันที่ไม่ถูกต้อง', 'วันปิดภาคเรียนต้องอยู่หลังวันเปิดภาคเรียน', 'error');
+                return;
+            }
+
+            semesterConfig.startDate = startStr;
+            semesterConfig.endDate = endStr;
+            localStorage.setItem('teacherSemesterConfig', JSON.stringify(semesterConfig));
+
+            let updatedDays = 0;
+            let skippedSpecialDays = 0;
+
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dow = d.getDay(); // 1 = Mon ... 5 = Fri
+                if (dow >= 1 && dow <= 5) {
+                    const key = formatDateKey(d);
+                    const existing = scheduleData[key];
+
+                    // Preserve special days (holiday / training / leave / substitute)
+                    const isSpecialDay = existing && (
+                        existing.status === 'holiday' ||
+                        existing.status === 'training' ||
+                        existing.status === 'leave' ||
+                        existing.status === 'substitute' ||
+                        (existing.periods && existing.periods.some(p => p.status === 'has_substitute' || p.status === 'subbing_others' || p.status === 'exam' || p.status === 'cancelled'))
+                    );
+
+                    if (preserveSpecial && isSpecialDay) {
+                        skippedSpecialDays++;
+                        continue;
+                    }
+
+                    scheduleData[key] = {
+                        status: "normal",
+                        announcement: existing && !existing.fromMaster && existing.announcement
+                            ? existing.announcement
+                            : "เข้าสอนตามตารางสอนปกติ คาบว่างที่เปิดรับนัดหมายสามารถส่งคำขอเข้าพบได้ครับ",
+                        fromMaster: true,
+                        periods: buildPeriodsFromMaster(dow)
+                    };
+                    updatedDays++;
+                }
+            }
+
+            // Set calendar view to semester start if currentDate is outside semester
+            if (currentDate < startDate || currentDate > endDate) {
+                currentDate = new Date(startDate);
+                while (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                calendarYear = currentDate.getFullYear();
+                calendarMonth = currentDate.getMonth();
+            }
+
+            saveData();
+            updateSemesterBadges();
+            renderMasterScheduleTable();
+
+            Swal.fire({
+                title: 'เชื่อมข้อมูลลงปฏิทินทั้งเทอมสำเร็จ!',
+                html: `
+                    <div class="text-left text-xs space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <p>📅 <strong>ช่วงภาคเรียน:</strong> ${formatThaiShortDate(startStr)} – ${formatThaiShortDate(endStr)}</p>
+                        <p>✅ <strong>อัปเดตตารางสอนในปฏิทิน:</strong> ${updatedDays} วันเรียน</p>
+                        ${skippedSpecialDays > 0 ? `<p>🛡️ <strong>รักษาวันพิเศษเดิมไว้:</strong> ${skippedSpecialDays} วัน (วันหยุดพิเศษ/ลา/อบรม/สอนแทน)</p>` : ''}
+                    </div>
+                `,
+                icon: 'success',
+                confirmButtonText: 'ไปดูปฏิทินปฏิบัติงาน',
+                confirmButtonColor: '#4f46e5'
+            }).then(() => {
+                switchTeacherTab('daily');
+            });
+        }
+
+        function clearSemesterCalendarData() {
+            Swal.fire({
+                title: 'ล้างข้อมูลตารางสอนทั้งเทอม?',
+                text: 'ข้อมูลรายวันที่เชื่อมไว้ในช่วงภาคเรียนนี้จะถูกลบออกจากปฏิทิน (ตารางสอนต้นแบบในหน้านี้จะยังคงอยู่)',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'ยืนยันการล้างข้อมูล',
+                cancelButtonText: 'ยกเลิก'
+            }).then(res => {
+                if (res.isConfirmed) {
+                    const start = parseLocalDate(document.getElementById('inputSemesterStart').value || semesterConfig.startDate);
+                    const end = parseLocalDate(document.getElementById('inputSemesterEnd').value || semesterConfig.endDate);
+                    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                        delete scheduleData[formatDateKey(d)];
+                    }
+                    saveData();
+                    renderMasterScheduleTable();
+                    Swal.fire('ล้างข้อมูลเรียบร้อย', 'ลบตารางสอนในช่วงวันที่เลือกออกจากปฏิทินแล้ว', 'success');
+                }
+            });
+        }
+
+        // --- PROFILE MANAGEMENT FUNCTIONS ---
+        function renderProfile() {
+            document.getElementById('teacherName').textContent = teacherProfile.name || defaultTeacherProfile.name;
+            document.getElementById('teacherPosition').textContent = teacherProfile.position || defaultTeacherProfile.position;
+            document.getElementById('teacherDept').textContent = teacherProfile.dept || defaultTeacherProfile.dept;
+            document.getElementById('schoolName').textContent = teacherProfile.school || defaultTeacherProfile.school;
+            document.getElementById('semesterLabel').textContent = teacherProfile.semester || defaultTeacherProfile.semester;
+
+            const avatarImg = document.getElementById('teacherAvatar');
+            avatarImg.src = teacherProfile.avatar || DEFAULT_AVATAR;
+            avatarImg.onerror = () => { avatarImg.src = DEFAULT_AVATAR; };
+        }
+
+        function openEditProfileModal() {
+            tempAvatarDataUrl = teacherProfile.avatar || DEFAULT_AVATAR;
+            document.getElementById('previewProfileAvatar').src = tempAvatarDataUrl;
+            document.getElementById('inputProfileImageFile').value = "";
+            document.getElementById('inputProfileAvatarUrl').value = tempAvatarDataUrl.startsWith('data:') ? '' : tempAvatarDataUrl;
+
+            document.getElementById('inputProfileName').value = teacherProfile.name || '';
+            document.getElementById('inputProfilePosition').value = teacherProfile.position || '';
+            document.getElementById('inputProfileDept').value = teacherProfile.dept || '';
+            document.getElementById('inputProfileSchool').value = teacherProfile.school || '';
+            document.getElementById('inputProfileSemester').value = teacherProfile.semester || '';
+
+            openModal('editProfileModal');
+        }
+
+        function handleProfileImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                Swal.fire('ไฟล์ไม่ถูกต้อง', 'กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 400;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height = Math.round((height * maxSize) / width);
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width = Math.round((width * maxSize) / height);
+                            height = maxSize;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    tempAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    document.getElementById('previewProfileAvatar').src = tempAvatarDataUrl;
+                    document.getElementById('inputProfileAvatarUrl').value = "";
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function previewAvatarFromUrl(url) {
+            const trimmed = url.trim();
+            if (trimmed) {
+                tempAvatarDataUrl = trimmed;
+                const preview = document.getElementById('previewProfileAvatar');
+                preview.src = trimmed;
+                preview.onerror = () => { preview.src = DEFAULT_AVATAR; };
+            }
+        }
+
+        function resetDefaultAvatar() {
+            tempAvatarDataUrl = DEFAULT_AVATAR;
+            document.getElementById('previewProfileAvatar').src = DEFAULT_AVATAR;
+            document.getElementById('inputProfileAvatarUrl').value = DEFAULT_AVATAR;
+            document.getElementById('inputProfileImageFile').value = "";
+        }
+
+        function saveProfileData(e) {
+            e.preventDefault();
+            teacherProfile = {
+                name: document.getElementById('inputProfileName').value.trim(),
+                position: document.getElementById('inputProfilePosition').value.trim(),
+                dept: document.getElementById('inputProfileDept').value.trim(),
+                school: document.getElementById('inputProfileSchool').value.trim(),
+                semester: document.getElementById('inputProfileSemester').value.trim() || "เทอม 2/2569",
+                avatar: tempAvatarDataUrl || DEFAULT_AVATAR
+            };
+
+            try {
+                localStorage.setItem('teacherProfileData', JSON.stringify(teacherProfile));
+                renderProfile();
+                updateSemesterBadges();
+                closeModal('editProfileModal');
+                Swal.fire({
+                    title: 'บันทึกโปรไฟล์สำเร็จ!',
+                    text: 'อัปเดตข้อมูลครูผู้สอนและรูปโปรไฟล์เรียบร้อยแล้ว',
+                    icon: 'success',
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', 'ขนาดรูปภาพใหญ่เกินไป กรุณาเลือกรูปภาพที่มีขนาดเล็กลง', 'error');
+            }
+        }
+
+        // Save Schedule & Appointments State
+        function saveData() {
+            localStorage.setItem('teacherScheduleData', JSON.stringify(scheduleData));
+            localStorage.setItem('teacherAppointments', JSON.stringify(appointments));
+            renderCalendar();
+            renderDailySchedule();
+            updateAppointmentBadge();
+        }
+
+        // --- VIEW SWITCHING ---
+        function switchView(mode) {
+            currentView = mode;
+            const btnTeacher = document.getElementById('btnTeacherView');
+            const btnStudent = document.getElementById('btnStudentView');
+
+            if (mode === 'teacher') {
+                btnTeacher.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white shadow";
+                btnStudent.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-indigo-300 hover:text-white";
+                document.querySelectorAll('.teacher-only').forEach(el => el.classList.remove('hidden'));
+                switchTeacherTab(currentTeacherTab);
+            } else {
+                btnStudent.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow";
+                btnTeacher.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-indigo-300 hover:text-white";
+                document.querySelectorAll('.teacher-only').forEach(el => el.classList.add('hidden'));
+                document.getElementById('tabContentDaily').classList.remove('hidden');
+                document.getElementById('tabContentMaster').classList.add('hidden');
+            }
+            renderDailySchedule();
+        }
+
+        // --- EDIT SPECIAL HOLIDAY NAME ---
+        function editHolidayName() {
+            const dateKey = formatDateKey(currentDate);
+            if (!scheduleData[dateKey]) return;
+
+            Swal.fire({
+                title: 'ระบุชื่อ / รายละเอียดวันหยุดพิเศษ',
+                input: 'text',
+                inputValue: scheduleData[dateKey].holidayName || 'วันหยุดพิเศษ (โรงเรียนปิดทำการ)',
+                inputPlaceholder: 'เช่น วันพ่อแห่งชาติ / วันหยุดชดเชย / วันปิดภาคเรียนกรณีพิเศษ',
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#0284c7'
+            }).then(res => {
+                if (res.isConfirmed) {
+                    const name = res.value.trim() || 'วันหยุดพิเศษ (โรงเรียนปิดทำการ)';
+                    scheduleData[dateKey].holidayName = name;
+                    scheduleData[dateKey].announcement = `โรงเรียนปิดทำการเนื่องใน${name} (ไม่มีการเรียนการสอน)`;
+                    scheduleData[dateKey].fromMaster = false;
+                    saveData();
+                }
+            });
+        }
+
+        // --- RENDER DAILY SCHEDULE & PERIODS ---
+        function renderDailySchedule() {
+            const dateKey = formatDateKey(currentDate);
+            const dateData = scheduleData[dateKey] || getEmptyDayStructure(currentDate.getDay());
+            
+            // Set Date Banner
+            const thaiDateStr = currentDate.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('selectedDateLabel').textContent = thaiDateStr;
+            document.getElementById('dailyAnnouncementText').textContent = `"${dateData.announcement || 'ไม่มีประกาศประจำวัน'}"`;
+            document.getElementById('dailyStatusSelect').value = dateData.status || 'normal';
+
+            // Update profile status dot color
+            const dot = document.getElementById('profileStatusDot');
+            if (dot) {
+                dot.className = "absolute -bottom-1 -right-1 w-4 h-4 border-2 border-white rounded-full " +
+                    (dateData.status === 'training' ? 'bg-amber-500' :
+                     dateData.status === 'leave' ? 'bg-rose-500' :
+                     dateData.status === 'substitute' ? 'bg-purple-600' :
+                     dateData.status === 'holiday' ? 'bg-sky-500' : 'bg-emerald-500');
+            }
+
+            const container = document.getElementById('periodsContainer');
+            container.innerHTML = '';
+
+            // Special Holiday Banner (โรงเรียนปิดทำการ ไม่มีการเรียนการสอน)
+            if (dateData.status === 'holiday') {
+                const holidayTitle = dateData.holidayName || 'วันหยุดพิเศษ (โรงเรียนปิดทำการ)';
+                container.innerHTML = `
+                    <div class="bg-gradient-to-br from-sky-50 via-white to-indigo-50/60 rounded-2xl p-8 text-center border-2 border-sky-200 shadow-sm space-y-3">
+                        <div class="w-16 h-16 rounded-2xl bg-sky-500 text-white flex items-center justify-center mx-auto text-2xl shadow-md">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                        </div>
+                        <div class="inline-block bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1 rounded-full">
+                            🔵 วันหยุดพิเศษ • โรงเรียนปิดทำการ
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">${holidayTitle}</h3>
+                        <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+                            ไม่มีการเรียนการสอนในวันนี้ และระบบงดการเปิดรับคำขอนัดหมายเข้าพบครูชั่วคราว
+                        </p>
+                        <div class="teacher-only ${currentView === 'student' ? 'hidden' : ''} pt-2 flex justify-center gap-2">
+                            <button onclick="editHolidayName()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm transition inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-pen"></i> แก้ไขชื่อวันหยุด
+                            </button>
+                            <button onclick="updateDailyStatus('normal')" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 text-xs font-medium px-4 py-2 rounded-xl transition">
+                                เปลี่ยนกลับเป็นวันสอนปกติ
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Weekend notice if Sat/Sun and no custom schedule
+            const dow = currentDate.getDay();
+            if ((dow === 0 || dow === 6) && !scheduleData[dateKey]) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 text-center border border-slate-200 space-y-2">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
+                            <i class="fa-solid fa-mug-saucer"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700 text-sm">วันหยุดสุดสัปดาห์ (ไม่มีตารางสอนปกติ)</h3>
+                        <p class="text-xs text-slate-500">เลือกวันจันทร์ - วันศุกร์ในปฏิทินเพื่อดูตารางสอน หรือบันทึกกิจกรรมพิเศษ</p>
+                    </div>
+                `;
+                return;
+            }
+
+            dateData.periods.forEach(p => {
+                const card = document.createElement('div');
+                
+                // Color & Badge Logic
+                let borderClass = "border-slate-200";
+                let badgeHTML = "";
+
+                if (p.status === 'has_substitute') {
+                    borderClass = "border-purple-300 bg-purple-50/40";
+                    badgeHTML = `<span class="bg-purple-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-user-clock mr-1"></i> ครูสอนแทน: ${p.subTeacherName || 'ไม่ได้ระบุ'}</span>`;
+                } else if (p.status === 'subbing_others') {
+                    borderClass = "border-indigo-300 bg-indigo-50/40";
+                    badgeHTML = `<span class="bg-indigo-700 text-white text-[11px] font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-hand-holding-hand mr-1"></i> ไปสอนแทน: ${p.originalTeacher || 'ครูผู้สอน'}</span>`;
+                } else if (p.status === 'cancelled') {
+                    borderClass = "border-rose-200 bg-rose-50/30";
+                    badgeHTML = `<span class="bg-rose-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">งดการเรียนการสอน</span>`;
+                } else if (p.status === 'exam') {
+                    borderClass = "border-amber-200 bg-amber-50/30";
+                    badgeHTML = `<span class="bg-amber-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">สอบเก็บคะแนน</span>`;
+                }
+
+                // Check Appointments for this slot
+                const slotAppointments = appointments.filter(a => a.date === dateKey && a.periodId === p.id);
+
+                card.className = `bg-white rounded-2xl p-4 shadow-sm border ${borderClass} transition hover:shadow-md`;
+                card.innerHTML = `
+                    <div class="flex flex-wrap justify-between items-start gap-2 mb-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-slate-800 text-amber-300 font-bold text-xs px-2.5 py-1 rounded-lg">คาบ ${p.id}</span>
+                            <span class="text-xs font-semibold text-slate-500"><i class="fa-regular fa-clock mr-1"></i> ${p.time} น.</span>
+                            ${badgeHTML}
+                        </div>
+
+                        <!-- Teacher Controls -->
+                        <div class="teacher-only ${currentView === 'student' ? 'hidden' : ''} flex items-center space-x-2">
+                            ${p.status === 'free' ? `
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" ${p.allowAppointment ? 'checked' : ''} onchange="toggleAppointmentOpen('${dateKey}', ${p.id})" class="sr-only peer">
+                                    <div class="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+                                    <span class="ml-1.5 text-[11px] font-medium text-slate-600">${p.allowAppointment ? 'เปิดรับนัด' : 'ปิดนัด'}</span>
+                                </label>
+                            ` : ''}
+                            <button onclick="openEditPeriodModal(${p.id})" class="text-slate-400 hover:text-indigo-600 p-1 rounded-lg text-xs"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="md:col-span-2 space-y-1">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center">
+                                ${p.code ? `<span class="text-indigo-600 mr-1.5">[${p.code}]</span>` : ''} ${p.subject}
+                            </h3>
+                            <p class="text-xs text-slate-600"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> ${p.room}</p>
+                            ${p.topic ? `<p class="text-xs text-slate-500"><span class="font-medium text-slate-700">หัวข้อ:</span> ${p.topic}</p>` : ''}
+                        </div>
+
+                        <!-- Homework / Student Notice -->
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5"><i class="fa-solid fa-note-sticky text-amber-500 mr-1"></i> แจ้งนักเรียน/การบ้าน</span>
+                                <p class="text-xs text-slate-700 font-medium">${p.homework || '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Reminder Status Badge for Substitutes -->
+                    ${(p.status === 'has_substitute' || p.status === 'subbing_others') ? `
+                        <div class="mt-3 pt-2 border-t border-purple-100 flex justify-between items-center text-[11px] text-purple-900">
+                            <span><i class="fa-regular fa-envelope mr-1"></i> การแจ้งเตือนอีเมล 30 นาที: <strong>${sentEmailTracker[`${dateKey}-${p.id}`] ? '✅ ส่งแจ้งเตือนแล้ว' : '⏳ รอส่งตามกำหนดเวลา'}</strong></span>
+                            <span class="text-slate-400">อีเมลผู้รับ: ${p.subTeacherEmail || 'ไม่ได้ระบุ'}</span>
+                        </div>
+                    ` : ''}
+
+                    <!-- Student Appointment Action Area -->
+                    ${p.allowAppointment && currentView === 'student' ? `
+                        <div class="mt-3 pt-2 border-t border-emerald-100 flex justify-between items-center bg-emerald-50/60 p-2.5 rounded-xl">
+                            <span class="text-xs font-semibold text-emerald-800"><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> คาบนี้เปิดรับนัดหมายเข้าพบครู</span>
+                            <button onclick="openStudentAppointmentModal(${p.id}, '${p.time}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow transition">
+                                <i class="fa-solid fa-calendar-plus mr-1"></i> จองนัดหมายเข้าพบ
+                            </button>
+                        </div>
+                    ` : ''}
+
+                    <!-- Appointment Status Badges if any -->
+                    ${slotAppointments.length > 0 ? `
+                        <div class="mt-2 space-y-1">
+                            ${slotAppointments.map(a => `
+                                <div class="text-xs p-2 rounded-lg flex justify-between items-center ${a.status === 'approved' ? 'bg-emerald-100 text-emerald-900' : a.status === 'rejected' ? 'bg-rose-100 text-rose-900' : 'bg-amber-100 text-amber-900'}">
+                                    <span><strong>นัดหมาย:</strong> ${a.studentName} (${a.studentClass}) - "${a.reason}"</span>
+                                    <span class="font-bold text-[10px] uppercase">${a.status === 'approved' ? '✅ อนุมัติแล้ว' : a.status === 'rejected' ? '❌ ไม่สะดวก' : '⏳ รออนุมัติ'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // --- CALENDAR LOGIC ---
+        function renderCalendar() {
+            const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+            const monthNamesStr = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            document.getElementById('calendarMonthYear').textContent = `${monthNamesStr[calendarMonth]} ${calendarYear + 543}`;
+
+            const calContainer = document.getElementById('calendarDays');
+            calContainer.innerHTML = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                calContainer.appendChild(document.createElement('div'));
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayBtn = document.createElement('button');
+                const thisDate = new Date(calendarYear, calendarMonth, day);
+                const dateKey = formatDateKey(thisDate);
+                const isSelected = formatDateKey(currentDate) === dateKey;
+
+                let dotColor = "";
+                if (scheduleData[dateKey]) {
+                    const st = scheduleData[dateKey].status;
+                    if (st === 'normal') dotColor = "bg-emerald-500";
+                    else if (st === 'training') dotColor = "bg-amber-500";
+                    else if (st === 'leave') dotColor = "bg-rose-500";
+                    else if (st === 'substitute') dotColor = "bg-purple-600";
+                    else if (st === 'holiday') dotColor = "bg-sky-500";
+                }
+
+                dayBtn.className = `h-9 rounded-xl flex flex-col items-center justify-center relative font-medium transition ${isSelected ? 'bg-indigo-600 text-white font-bold shadow-md' : 'hover:bg-slate-100 text-slate-700'}`;
+                dayBtn.innerHTML = `
+                    <span>${day}</span>
+                    ${dotColor ? `<span class="w-1.5 h-1.5 rounded-full ${dotColor} absolute bottom-1"></span>` : ''}
+                `;
+
+                dayBtn.onclick = () => {
+                    currentDate = thisDate;
+                    renderCalendar();
+                    renderDailySchedule();
+                };
+
+                calContainer.appendChild(dayBtn);
+            }
+        }
+
+        function changeMonth(delta) {
+            calendarMonth += delta;
+            if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+            if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+            renderCalendar();
+        }
+
+        // --- AUTOMATED 30-MINUTE EMAIL REMINDER ENGINE ---
+        function startEmailReminderChecker() {
+            setInterval(() => {
+                const now = new Date();
+                const todayKey = formatDateKey(now);
+                const dayData = scheduleData[todayKey];
+
+                if (!dayData || dayData.status === 'holiday') return;
+
+                dayData.periods.forEach(p => {
+                    if (p.status === 'has_substitute' || p.status === 'subbing_others') {
+                        const trackerKey = `${todayKey}-${p.id}`;
+                        if (sentEmailTracker[trackerKey]) return;
+
+                        const startTimeStr = p.time.split('-')[0].trim();
+                        const [hours, minutes] = startTimeStr.split(':').map(Number);
+                        
+                        const periodStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+                        const timeDiffMs = periodStartTime - now;
+                        const timeDiffMinutes = timeDiffMs / (1000 * 60);
+
+                        if (timeDiffMinutes > 0 && timeDiffMinutes <= 30) {
+                            sendSubstituteEmailNotification(p, todayKey, Math.round(timeDiffMinutes));
+                            sentEmailTracker[trackerKey] = true;
+                            renderDailySchedule();
+                        }
+                    }
+                });
+            }, 30000);
+        }
+
+        function sendSubstituteEmailNotification(period, dateKey, minsLeft) {
+            const recipientEmail = period.subTeacherEmail || "substitute@school.ac.th";
+            const targetTeacher = period.status === 'has_substitute' ? period.subTeacherName : teacherProfile.name;
+
+            Swal.fire({
+                title: '📧 ระบบส่งอีเมลแจ้งเตือนอัตโนมัติ!',
+                html: `
+                    <div class="text-left text-xs space-y-2">
+                        <p class="font-bold text-purple-900">แจ้งเตือนครูผู้สอนแทน ก่อนเริ่มคาบ 30 นาที</p>
+                        <p><strong>ผู้รับ:</strong> ${targetTeacher} (${recipientEmail})</p>
+                        <p><strong>รายละเอียด:</strong> คาบที่ ${period.id} (${period.time} น.) วิชา ${period.subject} ห้อง ${period.room}</p>
+                        <p class="text-slate-500">สถานะ: ส่งสำเร็จเข้าสู่ระบบอีเมลเรียบร้อยแล้ว</p>
+                    </div>
+                `,
+                icon: 'success',
+                confirmButtonText: 'รับทราบ',
+                confirmButtonColor: '#4f46e5'
+            });
+
+            const publicKey = localStorage.getItem('emailjs_key');
+            if (publicKey && window.emailjs) {
+                emailjs.init(publicKey);
+                emailjs.send('default_service', 'substitute_reminder_template', {
+                    to_email: recipientEmail,
+                    teacher_name: targetTeacher,
+                    period_num: period.id,
+                    subject_name: period.subject,
+                    room: period.room,
+                    time_slot: period.time
+                }).catch(err => console.error("EmailJS Error:", err));
+            }
+        }
+
+        function testTriggerEmailNotification() {
+            sendSubstituteEmailNotification({
+                id: 2,
+                time: "09:20 - 10:10",
+                subject: "วิทยาศาสตร์กายภาพ 2",
+                room: "ม.5/2 (ห้อง 422)",
+                subTeacherName: "ครูสมชาย สายสืบ",
+                subTeacherEmail: "somchai@school.ac.th",
+                status: "has_substitute"
+            }, formatDateKey(currentDate), 30);
+        }
+
+        // --- ADD SUBSTITUTE DUTY (ไปสอนแทนครูท่านอื่น) ---
+        function openAddSubstituteDutyModal() {
+            const select = document.getElementById('subDutyPeriodNumber');
+            const times = semesterConfig.periodTimes || defaultPeriodTimes;
+            select.innerHTML = times.map((t, idx) => `<option value="${idx + 1}">คาบ ${idx + 1} (${t})</option>`).join('');
+            openModal('addSubstituteDutyModal');
+        }
+
+        function saveSubstituteDuty(e) {
+            e.preventDefault();
+            const dateKey = formatDateKey(currentDate);
+            if (!scheduleData[dateKey]) scheduleData[dateKey] = getEmptyDayStructure(currentDate.getDay());
+
+            const origTeacher = document.getElementById('subDutyOriginalTeacher').value;
+            const periodNum = parseInt(document.getElementById('subDutyPeriodNumber').value);
+            const room = document.getElementById('subDutyRoom').value;
+            const subject = document.getElementById('subDutySubject').value || 'สอนแทน';
+            const notes = document.getElementById('subDutyNotes').value;
+            const myEmail = document.getElementById('subDutyMyEmail').value;
+
+            const periodIdx = scheduleData[dateKey].periods.findIndex(p => p.id === periodNum);
+            if (periodIdx !== -1) {
+                scheduleData[dateKey].periods[periodIdx] = {
+                    ...scheduleData[dateKey].periods[periodIdx],
+                    subject: `[สอนแทน] ${subject}`,
+                    code: "สอนแทน",
+                    room: room,
+                    status: "subbing_others",
+                    topic: `ไปสอนแทน: ${origTeacher}`,
+                    homework: notes || "สอนแทนครูท่านอื่น",
+                    originalTeacher: origTeacher,
+                    subTeacherEmail: myEmail
+                };
+            }
+
+            scheduleData[dateKey].status = 'substitute';
+            scheduleData[dateKey].fromMaster = false;
+            saveData();
+            closeModal('addSubstituteDutyModal');
+
+            Swal.fire('บันทึกสำเร็จ!', 'เพิ่มรายการไปสอนแทนครูท่านอื่นเรียบร้อยแล้ว', 'success');
+        }
+
+        // --- HELPER & MODAL FUNCTIONS ---
+        function getEmptyDayStructure(dayOfWeek) {
+            const times = semesterConfig.periodTimes || defaultPeriodTimes;
+            return {
+                status: "normal",
+                announcement: "ไม่มีประกาศสำหรับวันนี้",
+                periods: times.map((t, idx) => ({
+                    id: idx + 1,
+                    time: t,
+                    code: "",
+                    subject: "คาบว่าง",
+                    room: "-",
+                    status: "free",
+                    topic: "",
+                    homework: "",
+                    allowAppointment: false
+                }))
+            };
+        }
+
+        function toggleSubstituteFields(val) {
+            const subDiv = document.getElementById('substituteFields');
+            if (val === 'has_substitute') subDiv.classList.remove('hidden');
+            else subDiv.classList.add('hidden');
+        }
+
+        function openEditPeriodModal(periodId) {
+            const dateKey = formatDateKey(currentDate);
+            if (!scheduleData[dateKey]) scheduleData[dateKey] = getEmptyDayStructure(currentDate.getDay());
+            const period = scheduleData[dateKey].periods.find(p => p.id === periodId);
+
+            document.getElementById('editPeriodId').value = periodId;
+            document.getElementById('inputSubjectCode').value = period.code || '';
+            document.getElementById('inputSubjectName').value = period.subject || '';
+            document.getElementById('inputRoom').value = period.room || '';
+            document.getElementById('inputPeriodStatus').value = period.status || 'normal';
+            document.getElementById('inputTopic').value = period.topic || '';
+            document.getElementById('inputHomework').value = period.homework || '';
+            document.getElementById('inputSubTeacherName').value = period.subTeacherName || '';
+            document.getElementById('inputSubTeacherEmail').value = period.subTeacherEmail || '';
+
+            toggleSubstituteFields(period.status);
+            openModal('editPeriodModal');
+        }
+
+        function savePeriodData(e) {
+            e.preventDefault();
+            const dateKey = formatDateKey(currentDate);
+            if (!scheduleData[dateKey]) scheduleData[dateKey] = getEmptyDayStructure(currentDate.getDay());
+            const periodId = parseInt(document.getElementById('editPeriodId').value);
+            const period = scheduleData[dateKey].periods.find(p => p.id === periodId);
+
+            period.code = document.getElementById('inputSubjectCode').value;
+            period.subject = document.getElementById('inputSubjectName').value;
+            period.room = document.getElementById('inputRoom').value;
+            period.status = document.getElementById('inputPeriodStatus').value;
+            period.topic = document.getElementById('inputTopic').value;
+            period.homework = document.getElementById('inputHomework').value;
+            period.subTeacherName = document.getElementById('inputSubTeacherName').value;
+            period.subTeacherEmail = document.getElementById('inputSubTeacherEmail').value;
+
+            if (period.status === 'has_substitute') {
+                scheduleData[dateKey].status = 'substitute';
+            }
+            scheduleData[dateKey].fromMaster = false;
+
+            saveData();
+            closeModal('editPeriodModal');
+            Swal.fire('บันทึกเรียบร้อย', 'ปรับปรุงข้อมูลคาบเรียนแล้ว', 'success');
+        }
+
+        function toggleAppointmentOpen(dateKey, periodId) {
+            if (!scheduleData[dateKey]) scheduleData[dateKey] = getEmptyDayStructure(currentDate.getDay());
+            const period = scheduleData[dateKey].periods.find(p => p.id === periodId);
+            period.allowAppointment = !period.allowAppointment;
+            saveData();
+        }
+
+        // --- STUDENT APPOINTMENT MODAL FLOW ---
+        function openStudentAppointmentModal(periodId, periodTime) {
+            document.getElementById('appointPeriodId').value = periodId;
+            document.getElementById('appointPeriodTitle').textContent = `คาบเรียนที่ ${periodId} (${periodTime} น.)`;
+            document.getElementById('appointPeriodDate').textContent = currentDate.toLocaleDateString('th-TH', { dateStyle: 'full' });
+            openModal('studentAppointmentModal');
+        }
+
+        function submitStudentAppointment(e) {
+            e.preventDefault();
+            const dateKey = formatDateKey(currentDate);
+            const newApt = {
+                id: 'apt-' + Date.now(),
+                date: dateKey,
+                periodId: parseInt(document.getElementById('appointPeriodId').value),
+                periodTime: document.getElementById('appointPeriodTitle').textContent,
+                studentName: document.getElementById('appointStudentName').value,
+                studentClass: document.getElementById('appointStudentClass').value,
+                contact: document.getElementById('appointStudentContact').value,
+                reason: document.getElementById('appointReason').value,
+                status: 'pending'
+            };
+
+            appointments.push(newApt);
+            saveData();
+            closeModal('studentAppointmentModal');
+            Swal.fire('ส่งคำขอสำเร็จ!', 'ครูผู้สอนได้รับคำขอนัดหมายเรียบร้อยแล้ว', 'success');
+        }
+
+        function updateAppointmentBadge() {
+            const pendingCount = appointments.filter(a => a.status === 'pending').length;
+            const badge = document.getElementById('appointmentCountBadge');
+            if (pendingCount > 0) {
+                badge.textContent = pendingCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function openAppointmentsModal() {
+            const container = document.getElementById('appointmentsListContainer');
+            container.innerHTML = '';
+
+            if (appointments.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">ไม่มีคำขอนัดหมายในระบบ</p>`;
+            } else {
+                appointments.forEach(a => {
+                    const div = document.createElement('div');
+                    div.className = "p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-slate-800">${a.studentName} (${a.studentClass})</h4>
+                                <p class="text-indigo-600 font-medium">${a.date} | ${a.periodTime}</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded font-bold uppercase text-[10px] ${a.status==='approved'?'bg-emerald-200 text-emerald-800':a.status==='rejected'?'bg-rose-200 text-rose-800':'bg-amber-200 text-amber-800'}">${a.status}</span>
+                        </div>
+                        <p class="text-slate-600"><strong>เรื่อง:</strong> ${a.reason}</p>
+                        <p class="text-slate-500"><strong>ติดต่อ:</strong> ${a.contact}</p>
+                        
+                        ${a.status === 'pending' ? `
+                            <div class="pt-2 flex gap-2 justify-end">
+                                <button onclick="respondAppointment('${a.id}', 'rejected')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1 rounded-lg font-bold">❌ ไม่สะดวก</button>
+                                <button onclick="respondAppointment('${a.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-lg font-bold">✅ อนุมัตินัดหมาย</button>
+                            </div>
+                        ` : ''}
+                    `;
+                    container.appendChild(div);
+                });
+            }
+            openModal('appointmentsManagerModal');
+        }
+
+        function respondAppointment(aptId, status) {
+            const apt = appointments.find(a => a.id === aptId);
+            if (apt) {
+                apt.status = status;
+                saveData();
+                openAppointmentsModal();
+            }
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function copyScheduleSnippet() {
+            const dateKey = formatDateKey(currentDate);
+            const dateData = scheduleData[dateKey] || getEmptyDayStructure(currentDate.getDay());
+
+            if (dateData.status === 'holiday') {
+                const holidayTitle = dateData.holidayName || 'วันหยุดพิเศษ (โรงเรียนปิดทำการ)';
+                const holidayText = `📌 **แจ้งสถานะการเรียนการสอน (${teacherProfile.school})**\n📅 วันที่: ${dateKey}\n🔵 สถานะ: ${holidayTitle}\n📢 ประกาศ: ${dateData.announcement || 'โรงเรียนปิดทำการ ไม่มีการเรียนการสอน'}`;
+                navigator.clipboard.writeText(holidayText);
+                Swal.fire('คัดลอกแล้ว!', 'นำข้อความแจ้งวันหยุดพิเศษไปวางใน LINE Group ได้ทันที', 'success');
+                return;
+            }
+
+            let text = `📌 **ตารางสอน ${teacherProfile.name} (${teacherProfile.school})**\n📅 วันที่: ${dateKey}\n📢 ประกาศ: ${dateData.announcement}\n------------------\n`;
+            
+            dateData.periods.forEach(p => {
+                text += `คาบ ${p.id} (${p.time}): ${p.subject} [${p.room}] ${p.status==='has_substitute'?`(สอนแทน: ${p.subTeacherName})`:''}\n`;
+            });
+
+            navigator.clipboard.writeText(text);
+            Swal.fire('คัดลอกแล้ว!', 'นำข้อความไปวางใน LINE Group ได้ทันที', 'success');
+        }
+
+        function openEmailSettingsModal() { openModal('emailSettingsModal'); }
+        function saveEmailSettings() {
+            const key = document.getElementById('emailjsPublicKey').value;
+            localStorage.setItem('emailjs_key', key);
+            closeModal('emailSettingsModal');
+            Swal.fire('บันทึกแล้ว', 'ตั้งค่า Email Service เรียบร้อยแล้ว', 'success');
+        }
+        function editDailyAnnouncement() {
+            const dateKey = formatDateKey(currentDate);
+            if (!scheduleData[dateKey]) scheduleData[dateKey] = getEmptyDayStructure(currentDate.getDay());
+            Swal.fire({
+                title: 'แก้ไขประกาศประจำวัน',
+                input: 'textarea',
+                inputValue: scheduleData[dateKey]?.announcement || '',
+                showCancelButton: true
+            }).then(res => {
+                if (res.isConfirmed && scheduleData[dateKey]) {
+                    scheduleData[dateKey].announcement = res.value;
+                    scheduleData[dateKey].fromMaster = false;
+                    saveData();
+                }
+            });
+        }
+        function updateDailyStatus(val) {
+            const dateKey = formatDateKey(currentDate);
+            if (!scheduleData[dateKey]) scheduleData[dateKey] = getEmptyDayStructure(currentDate.getDay());
+
+            if (val === 'holiday') {
+                Swal.fire({
+                    title: 'ตั้งค่าเป็นวันหยุดพิเศษ',
+                    text: 'ระบุชื่อวันหยุดหรือสาเหตุที่โรงเรียนปิด (เช่น วันหยุดราชการ / วันหยุดชดเชย)',
+                    input: 'text',
+                    inputValue: scheduleData[dateKey].holidayName || 'วันหยุดพิเศษ (โรงเรียนปิดทำการ)',
+                    showCancelButton: true,
+                    confirmButtonText: 'บันทึกวันหยุด',
+                    cancelButtonText: 'ยกเลิก',
+                    confirmButtonColor: '#0284c7'
+                }).then(res => {
+                    if (res.isConfirmed) {
+                        const holidayName = res.value.trim() || 'วันหยุดพิเศษ (โรงเรียนปิดทำการ)';
+                        scheduleData[dateKey].status = 'holiday';
+                        scheduleData[dateKey].holidayName = holidayName;
+                        scheduleData[dateKey].announcement = `โรงเรียนปิดทำการเนื่องใน${holidayName} (ไม่มีการเรียนการสอน)`;
+                        scheduleData[dateKey].fromMaster = false;
+                        saveData();
+                    } else {
+                        // Revert dropdown if cancelled
+                        document.getElementById('dailyStatusSelect').value = scheduleData[dateKey].status || 'normal';
+                    }
+                });
+                return;
+            }
+
+            scheduleData[dateKey].status = val;
+            scheduleData[dateKey].fromMaster = false;
+            saveData();
+        }
+    </script>
+</body>
+</html>
